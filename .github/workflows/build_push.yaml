@@ -1,0 +1,17 @@
+name: Build and Push on Release
+on:
+  release:
+    types: [created]
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    environment: dev
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+      - name: Build and Push Public Image to ComputeSphere
+        uses: computesphere/build-and-deploy-image-action@v1.0.1
+        with:
+          mode: build-and-push
+          name: ${{ vars.REGISTRY }}/${{ vars.IMAGE }}:${{ github.event.release.tag_name }}
+          registry: ${{ vars.REGISTRY }}
