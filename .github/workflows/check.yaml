@@ -1,0 +1,48 @@
+name: CI Checks
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+jobs:
+  lint-check:
+    runs-on: ubuntu-latest
+    environment: dev
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install Dependencies
+        run: npm ci
+      - name: Run Lint
+        run: npm run lint
+  build-check:
+    runs-on: ubuntu-latest
+    environment: dev
+    needs: lint-check
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install Dependencies
+        run: npm ci
+      - name: Run Build
+        run: npm run build
+  build-image:
+    runs-on: ubuntu-latest
+    environment: dev
+    needs: build-check
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+      - name: Build Image
+        uses: computesphere/build-and-deploy-image-action@v1.0.1
+        with:
+          mode: build-only
+          name: ${{ vars.IMAGE }}:${{ github.sha }}
